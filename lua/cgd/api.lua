@@ -54,7 +54,7 @@ function M.complete(prompt, text, callback)
   end
 
   vim.system(build_cmd(token, tmpfile, cfg), { text = true }, function(result)
-    vim.fn.delete(tmpfile)
+    os.remove(tmpfile)
     if result.code ~= 0 then
       callback(nil, (result.stderr ~= "" and result.stderr) or ("curl exit " .. result.code))
       return
@@ -127,7 +127,7 @@ function M.stream(prompt, text, on_token, on_done)
       leftover = chunk:sub(pos)
     end,
   }, function(result)
-    vim.fn.delete(tmpfile)
+    os.remove(tmpfile)
     local final = full
     vim.schedule(function()
       if result.code ~= 0 then
