@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# cgd — pipe text through AI at chat.gambhir.dev
+# Usage: echo "text" | cgd "rewrite professionally"
+#        cat file.txt | cgd "optimize this"
+#
+# Requires: CGD_TOKEN env var, curl, jq
+
+set -euo pipefail
+
+ENDPOINT="${CGD_ENDPOINT:-https://chat.gambhir.dev/v1/chat/completions}"
+MODEL="${CGD_MODEL:-qwen2.5}"
+TIMEOUT="${CGD_TIMEOUT:-30}"
+
+usage() {
+  echo "Usage: <stdin> | cgd <prompt>" >&2
+  echo "       cat file.txt | cgd 'rewrite professionally'" >&2
+  echo "" >&2
+  echo "Env vars:" >&2
+  echo "  CGD_TOKEN    required  API key (sk-gam-...)" >&2
+  echo "  CGD_MODEL    optional  model name (default: qwen2.5)" >&2
+  echo "  CGD_ENDPOINT optional  API base URL" >&2
+  exit 1
+}
+
+if [[ $# -lt 1 ]]; then
+  usage
+fi
+
+PROMPT="$1"
+
+if [[ -z "${CGD_TOKEN:-}" ]]; then
+  echo "Error: CGD_TOKEN not set" >&2
+  echo "  export CGD_TOKEN=sk-gam-..." >&2
+  exit 1
+fi
+
+TEXT=$(cat)
+
+if [[ -z "$TEXT" ]]; then
+  echo "Error: no input text (pipe text via stdin)" >&2
+  exit 1
+fi
+
+SYSTEM_MSG="You are a code editor assistant. The user will provide selected text and an editing instruction. Return ONLY the modified text with no explanation, no markdown fences, and no preamble. Preserve the original indentation and line structure unless the instruction asks you to change it."
+
+BODY=$(jq -n \
+  --arg model   "$MODEL" \
+  --arg system  "$SYSTEM_MSG" \
+  --arg content "$PROMPT"$'\n\n'"$TEXT" \
+  '{
+    model: $model,
+    messages: [
+      {role: "system", content: $system},
+      {role: "user",   content: $content}
+    ],
+    stream: false,
+    temperature: 0.3
+  }')
+
+RESPONSE=$(curl -s -f \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $CGD_TOKEN" \
+  --max-time "$TIMEOUT" \
+  -d "$BODY" \
+  "$ENDPOINT" 2>&1) || {
+  echo "Error: API request failed (curl exit $?)" >&2
+  exit 1
+}
+
+CONTENT=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // empty' 2>/dev/null)
+
+if [[ -z "$CONTENT" ]]; then
+  ERROR=$(echo "$RESPONSE" | jq -r '.error.message // "Unknown error"' 2>/dev/null || echo "$RESPONSE")
+  echo "Error: $ERROR" >&2
+  exit 1
+fi
+
+printf '%s' "$CONTENT"
