@@ -1,10 +1,10 @@
 local M = {}
 
 local function run(prompt)
-  local ui = require("cgd.ui")
+  local ui        = require("cgd.ui")
   local selection = require("cgd.selection")
-  local api = require("cgd.api")
-  local replace = require("cgd.replace")
+  local api       = require("cgd.api")
+  local replace   = require("cgd.replace")
 
   if not prompt or vim.trim(prompt) == "" then
     ui.error("Usage: visually select text, then :Cgd <prompt>")
@@ -17,18 +17,51 @@ local function run(prompt)
     return
   end
 
-  ui.start_loading("thinking...")
+  local edit_winnr = vim.api.nvim_get_current_win()
 
-  api.complete(prompt, sel.text, function(response, api_err)
-    vim.schedule(function()
-      ui.stop_loading()
+  ui.open_float("CGD: " .. prompt)
+
+  api.stream(prompt, sel.text,
+    function(_, full)
+      ui.update_float(nil, full)
+    end,
+    function(response, api_err)
       if api_err then
+        ui.close_float()
         ui.error(api_err)
         return
       end
-      replace.apply(sel.bufnr, sel.start_line, sel.end_line, response)
-      ui.notify("Done")
-    end)
+      if not response or response == "" then
+        ui.close_float()
+        ui.error("Empty response from API")
+        return
+      end
+
+      ui.finalize_float(
+        function(content)
+          if vim.api.nvim_win_is_valid(edit_winnr) then
+            vim.api.nvim_set_current_win(edit_winnr)
+          end
+          replace.apply(sel.bufnr, sel.start_line, sel.end_line, content)
+          ui.notify("Applied")
+        end,
+        function()
+          if vim.api.nvim_win_is_valid(edit_winnr) then
+            vim.api.nvim_set_current_win(edit_winnr)
+          end
+          ui.notify("Rejected")
+        end
+      )
+    end
+  )
+end
+
+-- Called from <leader>ai keymap
+function M.prompt()
+  vim.ui.input({ prompt = "CGD > " }, function(input)
+    if input and vim.trim(input) ~= "" then
+      run(input)
+    end
   end)
 end
 
