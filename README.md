@@ -14,7 +14,7 @@ AI text editing for Neovim. Select text, run `:Cgd <prompt>`, get replacement.
 
 ```lua
 {
-  dir = "~/coding/cgd.nvim",   -- or GitHub path once published
+  "gambhirsharma/cgd.nvim",
   config = function()
     require("cgd").setup({
       -- endpoint = "https://chat.gambhir.dev/v1/chat/completions",
@@ -53,17 +53,15 @@ export CGD_TOKEN=sk-gam-...
 :CgdTests      " write unit tests
 ```
 
-**Keymap:**
+**Keymaps:**
 
 ```lua
-vim.keymap.set("v", "<leader>ai", function()
-  vim.ui.input({ prompt = "CGD prompt: " }, function(input)
-    if input and input ~= "" then
-      require("cgd.commands")  -- commands already registered
-      vim.cmd("'<,'>Cgd " .. input)
-    end
-  end)
-end, { desc = "CGD AI edit" })
+vim.keymap.set("v", "<leader>ai",  ":<C-u>lua require('cgd.commands').prompt()<CR>", { desc = "CGD: prompt" })
+vim.keymap.set("v", "<leader>aif", ":<C-u>CgdFix<CR>",      { desc = "CGD: fix" })
+vim.keymap.set("v", "<leader>aie", ":<C-u>CgdExplain<CR>",  { desc = "CGD: explain" })
+vim.keymap.set("v", "<leader>aio", ":<C-u>CgdOptimize<CR>", { desc = "CGD: optimize" })
+vim.keymap.set("v", "<leader>air", ":<C-u>CgdRewrite<CR>",  { desc = "CGD: rewrite" })
+vim.keymap.set("v", "<leader>ait", ":<C-u>CgdTests<CR>",    { desc = "CGD: tests" })
 ```
 
 ## CLI
