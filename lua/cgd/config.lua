@@ -5,7 +5,7 @@ M.defaults = {
   model       = "qwen2.5",
   token_env   = "CGD_TOKEN",
   token       = nil,
-  timeout     = 30,
+  timeout     = 120,
   keymap      = "<leader>ai",  -- false to disable
   system_prompt = "You are a code editor assistant. The user will provide selected text and an editing instruction. Return ONLY the modified text with no explanation, no markdown fences, and no preamble. Preserve the original indentation and line structure unless the instruction asks you to change it.",
 }
