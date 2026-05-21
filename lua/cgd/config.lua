@@ -1,9 +1,9 @@
 local M = {}
 
 M.defaults = {
-  endpoint    = "https://chat.gambhir.dev/v1/chat/completions",
-  model       = "qwen2.5",
-  token_env   = "CGD_TOKEN",
+  endpoint    = "https://openrouter.ai/api/v1/chat/completions",
+  model       = "openai/gpt-4o-mini",
+  token_env   = "OPENROUTER_API_KEY",
   token       = nil,
   timeout     = 120,
   keymap      = "<leader>ai",  -- false to disable

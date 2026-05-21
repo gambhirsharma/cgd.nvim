@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# cgd — pipe text through AI at chat.gambhir.dev
+# cgd — pipe text through AI via OpenRouter
 # Usage: echo "text" | cgd "rewrite professionally"
 #        cat file.txt | cgd "optimize this"
 #
-# Requires: CGD_TOKEN env var, curl, jq
+# Requires: OPENROUTER_API_KEY env var, curl, jq
 
 set -euo pipefail
 
-ENDPOINT="${CGD_ENDPOINT:-https://chat.gambhir.dev/v1/chat/completions}"
-MODEL="${CGD_MODEL:-qwen2.5}"
+ENDPOINT="${CGD_ENDPOINT:-https://openrouter.ai/api/v1/chat/completions}"
+MODEL="${CGD_MODEL:-openai/gpt-4o-mini}"
 TIMEOUT="${CGD_TIMEOUT:-30}"
 
 usage() {
@@ -16,7 +16,7 @@ usage() {
   echo "       cat file.txt | cgd 'rewrite professionally'" >&2
   echo "" >&2
   echo "Env vars:" >&2
-  echo "  CGD_TOKEN    required  API key (sk-gam-...)" >&2
+  echo "  OPENROUTER_API_KEY  required  OpenRouter API key (sk-or-...)" >&2
   echo "  CGD_MODEL    optional  model name (default: qwen2.5)" >&2
   echo "  CGD_ENDPOINT optional  API base URL" >&2
   exit 1
@@ -28,9 +28,9 @@ fi
 
 PROMPT="$1"
 
-if [[ -z "${CGD_TOKEN:-}" ]]; then
-  echo "Error: CGD_TOKEN not set" >&2
-  echo "  export CGD_TOKEN=sk-gam-..." >&2
+if [[ -z "${OPENROUTER_API_KEY:-}" ]]; then
+  echo "Error: OPENROUTER_API_KEY not set" >&2
+  echo "  export OPENROUTER_API_KEY=sk-or-..." >&2
   exit 1
 fi
 
@@ -60,7 +60,7 @@ BODY=$(jq -n \
 RESPONSE=$(curl -s -f \
   -X POST \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $CGD_TOKEN" \
+  -H "Authorization: Bearer $OPENROUTER_API_KEY" \
   --max-time "$TIMEOUT" \
   -d "$BODY" \
   "$ENDPOINT" 2>&1) || {

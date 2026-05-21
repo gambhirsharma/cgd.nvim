@@ -6,7 +6,7 @@ AI text editing for Neovim. Select text, run `:Cgd <prompt>`, get replacement.
 
 - Neovim 0.10+ (uses `vim.system()`)
 - `curl`, `jq`
-- API key from [chat.gambhir.dev](https://chat.gambhir.dev)
+- API key from [openrouter.ai](https://openrouter.ai/keys)
 
 ## Install
 
@@ -17,9 +17,9 @@ AI text editing for Neovim. Select text, run `:Cgd <prompt>`, get replacement.
   "gambhirsharma/cgd.nvim",
   config = function()
     require("cgd").setup({
-      -- endpoint = "https://chat.gambhir.dev/v1/chat/completions",
-      -- model = "qwen2.5",
-      -- token = "sk-gam-...",  -- or set CGD_TOKEN env var
+      -- endpoint = "https://openrouter.ai/api/v1/chat/completions",
+      -- model = "openai/gpt-4o-mini",
+      -- token = "sk-or-...",  -- or set OPENROUTER_API_KEY env var
     })
   end,
 }
@@ -28,7 +28,7 @@ AI text editing for Neovim. Select text, run `:Cgd <prompt>`, get replacement.
 **Environment:**
 
 ```bash
-export CGD_TOKEN=sk-gam-...
+export OPENROUTER_API_KEY=sk-or-...
 ```
 
 ## Usage
@@ -79,10 +79,10 @@ cat file.py | cgd "add type hints"
 
 ```lua
 require("cgd").setup({
-  endpoint  = "https://chat.gambhir.dev/v1/chat/completions",
-  model     = "qwen2.5",
-  token     = nil,        -- falls back to CGD_TOKEN env var
-  token_env = "CGD_TOKEN",
+  endpoint  = "https://openrouter.ai/api/v1/chat/completions",
+  model     = "openai/gpt-4o-mini",
+  token     = nil,        -- falls back to OPENROUTER_API_KEY env var
+  token_env = "OPENROUTER_API_KEY",
   timeout   = 30,         -- seconds
   system_prompt = "...",  -- override the system prompt
 })

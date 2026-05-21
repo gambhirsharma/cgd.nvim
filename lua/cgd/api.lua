@@ -43,7 +43,7 @@ function M.complete(prompt, text, callback)
   local cfg = require("cgd.config").get()
   local token = cfg.token or vim.env[cfg.token_env]
   if not token or token == "" then
-    callback(nil, "CGD_TOKEN not set. Run: export CGD_TOKEN=sk-gam-...")
+    callback(nil, "OPENROUTER_API_KEY not set. Run: export OPENROUTER_API_KEY=sk-or-...")
     return
   end
 
@@ -83,7 +83,7 @@ function M.stream(prompt, text, on_token, on_done)
   local cfg = require("cgd.config").get()
   local token = cfg.token or vim.env[cfg.token_env]
   if not token or token == "" then
-    on_done(nil, "CGD_TOKEN not set. Run: export CGD_TOKEN=sk-gam-...")
+    on_done(nil, "OPENROUTER_API_KEY not set. Run: export OPENROUTER_API_KEY=sk-or-...")
     return
   end
 
